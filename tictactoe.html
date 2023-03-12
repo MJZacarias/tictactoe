@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Tic Tac Toe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #9c9c9c;
+            font-family: "Comic Sans MS", "Comic Sans", cursive;
+        }
+
+        #board {
+            border-radius: 3px;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            max-width: 500px;
+        }
+
+        .cell {
+            aspect-ratio: 1 / 1;
+            background-color: #547e88;
+            border: 15px solid black;
+            text-align: center;
+            user-select: none;
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        #reset-button {
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="d-flex justify-content-center">
+        <h1>Tic Tac Toe</h1>
+    </div>
+    <div class="container d-flex justify-content-center">
+        <table id="board">
+            <tr>
+                <td class="cell"></td>
+                <td class="cell"></td>
+                <td class="cell"></td>
+            </tr>
+            <tr>
+                <td class="cell"></td>
+                <td class="cell"></td>
+                <td class="cell"></td>
+            </tr>
+            <tr>
+                <td class="cell"></td>
+                <td class="cell"></td>
+                <td class="cell"></td>
+            </tr>
+        </table>
+    </div>
+    <div class="container d-flex justify-content-center">
+        <button id="reset-button" class="btn btn-primary" onclick="reset()">Reset Game</button>
+    </div>
+    <div class="container d-flex justify-content-center">
+        &nbsp;Prompt:&nbsp;<span id="prompt"></span>
+    </div>
+
+    <!-- Bootstrap script -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.js"
+        integrity="sha256-HwWONEZrpuoh951cQD1ov2HUK5zA5DwJ1DNUXaM6FsY=" crossorigin="anonymous"></script>
+
+    <!-- Tic Tac Toe Game Logic -->
+    <script>
+        var domain = "http://desmondtiny.com/image/";
+        var x_url = "x.png";
+        var o_url = "o.png";
+        var q_url = "q.png";
+
+        var game = {
+            players: ["X", "O"],
+            _turn: 0,
+            nextTurn: function () {
+                game._turn = (game._turn + 1) % 2;
+            },
+            currentPlayer: function () {
+                return game.players[game._turn];
+            },
+        }
+        function clickCellEvent() {
+            var location = {
+                row: this.parentNode.rowIndex,
+                col: this.cellIndex,
+            }
+            if (isCellMarked(location)) {
+                setBoard(location.row, location.col, game.currentPlayer());
+                game.nextTurn();
+            }
+            if (boardHasWinner()) {
+                freezeBoard();
+                $("#prompt").html(`'${boardHasWinner()}' won the game!`)
+            }
+            if (boardFilled()) {
+                freezeBoard();
+                $("#prompt").html(`Tie game!`)
+            }
+        }
+        function isCellMarked(location) {
+            return (
+                getBoard()[location.row][location.col] != "X" &&
+                getBoard()[location.row][location.col] != "O"
+            )
+        }
+        function getBoard() {
+            var board = [
+                [
+                    $($("#board").find("td")[0]).attr("value"),
+                    $($("#board").find("td")[1]).attr("value"),
+                    $($("#board").find("td")[2]).attr("value"),
+                ],
+                [
+                    $($("#board").find("td")[3]).attr("value"),
+                    $($("#board").find("td")[4]).attr("value"),
+                    $($("#board").find("td")[5]).attr("value"),
+                ],
+                [
+                    $($("#board").find("td")[6]).attr("value"),
+                    $($("#board").find("td")[7]).attr("value"),
+                    $($("#board").find("td")[8]).attr("value"),
+                ],
+            ];
+            return board;
+        }
+        function setBoard(row, col, value) {
+            var image_url;
+            if (value.toUpperCase() == "X") { image_url = x_url; }
+            else if (value.toUpperCase() == "O") { image_url = o_url; }
+            else { image_url = q_url; }
+            var cell = $($("#board").find("td")[row * 3 + col]);
+            cell.attr("value", value);
+            if (value == " ") {
+                cell.css("background-image", "");
+                cell.removeAttr("value");
+            }
+            else {
+                cell.css("background-image", `url('${image_url}')`);
+            }
+        }
+        function freezeBoard() {
+            $(".cell").unbind("click");
+        }
+        function unfreezeBoard() {
+            $(".cell").click(clickCellEvent);
+        } unfreezeBoard();
+        function boardHasWinner() {
+            var b = getBoard();
+            if (
+                /* Rows */
+                "X" == b[0][0] && b[0][0] == b[0][1] && b[0][1] == b[0][2] ||
+                "X" == b[1][0] && b[1][0] == b[1][1] && b[1][1] == b[1][2] ||
+                "X" == b[2][0] && b[2][0] == b[2][1] && b[2][1] == b[2][2] ||
+                /* Columns */
+                "X" == b[0][0] && b[0][0] == b[1][0] && b[1][0] == b[2][0] ||
+                "X" == b[0][1] && b[0][1] == b[1][1] && b[1][1] == b[2][1] ||
+                "X" == b[0][2] && b[0][2] == b[1][2] && b[1][2] == b[2][2] ||
+                /* Diagonal */
+                "X" == b[0][0] && b[0][0] == b[1][1] && b[1][1] == b[2][2] ||
+                "X" == b[0][2] && b[0][2] == b[1][1] && b[1][1] == b[2][0]
+            ) {
+                return "X";
+            }
+            else if (
+                /* Rows */
+                "O" == b[0][0] && b[0][0] == b[0][1] && b[0][1] == b[0][2] ||
+                "O" == b[1][0] && b[1][0] == b[1][1] && b[1][1] == b[1][2] ||
+                "O" == b[2][0] && b[2][0] == b[2][1] && b[2][1] == b[2][2] ||
+                /* Columns */
+                "O" == b[0][0] && b[0][0] == b[1][0] && b[1][0] == b[2][0] ||
+                "O" == b[0][1] && b[0][1] == b[1][1] && b[1][1] == b[2][1] ||
+                "O" == b[0][2] && b[0][2] == b[1][2] && b[1][2] == b[2][2] ||
+                /* Diagonal */
+                "O" == b[0][0] && b[0][0] == b[1][1] && b[1][1] == b[2][2] ||
+                "O" == b[0][2] && b[0][2] == b[1][1] && b[1][1] == b[2][0]
+            ) {
+                return "O";
+            }
+            return false;
+        }
+        function boardFilled() {
+            var b = getBoard();
+            for (r = 0; r < 3; r++) {
+                for (c = 0; c < 3; c++) {
+                    if (b[r][c] == undefined) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        function reset() {
+            for (r = 0; r < 3; r++) {
+                for (c = 0; c < 3; c++) {
+                    setBoard(r, c, " ");
+                }
+            }
+            $("#prompt").html(``);
+            unfreezeBoard();
+        }
+    </script>
+
+</body>
+
+</html>
